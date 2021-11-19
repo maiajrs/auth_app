@@ -37,7 +37,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isAuthenticated = !!user;
 
   useEffect(() => {
-    console.log("oi do ctx");
     const { "next-auth.token": token } = parseCookies();
     if (token) {
       api.get("/me").then((response) => {
@@ -64,7 +63,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       setUser({ email, roles, permissions });
 
-      api.defaults.headers["Authorization"] = `Bearer ${token}`;
+      api.defaults.headers["Authorization"] = `Bearer ${token}`
 
       Router.push("/dashboard");
     } catch {
