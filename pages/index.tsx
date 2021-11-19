@@ -2,6 +2,7 @@ import React, { FormEvent } from "react";
 import signContext from "../context/AuthContext";
 import styles from "../styles/Home.module.css";
 export default function Home() {
+  console.log('oi do home')
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
@@ -10,7 +11,11 @@ export default function Home() {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
 
-    await signIn({ email, password });
+    const data = await signIn({ email, password });
+    if (isAuthenticated) {
+      
+      console.log("foi authenticado", data)
+    }
   }
   return (
     <form onSubmit={handleSubmit} className={styles.container}>
