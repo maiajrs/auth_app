@@ -1,10 +1,10 @@
 import axios, { AxiosError } from "axios";
-import { parseCookies, setCookie, destroyCookie } from "nookies";
+import { parseCookies, setCookie } from "nookies";
+import { signOut } from "../context/AuthContext";
 
 let cookies = parseCookies();
 let isRefreshing = false;
 let failedRequestsQueue = [];
-
 
 export const api = axios.create({
   baseURL: "http://localhost:3333",
@@ -18,12 +18,13 @@ api.interceptors.response.use(
   (error: AxiosError) => {
     if (error.response?.status === 401) {
       if (error.response?.data.code === "token.expired") {
-
         cookies = parseCookies();
         const { "next-auth.refreshToken": refreshToken } = cookies;
         const originalConfig = error.config;
 
-         if (!isRefreshing) {
+        if (!isRefreshing) {
+        console.log('IS_REFRESHING')
+
           isRefreshing = true;
           api
             .post("/refresh", { refreshToken })
@@ -68,15 +69,16 @@ api.interceptors.response.use(
               resolve(api(originalConfig));
             },
             onFailure: (err: AxiosError) => {
-
               reject(err);
             },
           });
         });
       } else {
-        destroyCookie(undefined, "next-auth.token");
-        destroyCookie(undefined, "next-auth.refreshToken");
+        console.log('SIGNOUT')
+        signOut();
       }
     }
+    console.log('PROMISE_REJECT')
+    return Promise.reject(error);
   }
 );
