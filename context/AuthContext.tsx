@@ -5,7 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { api } from "../services";
+import { api } from "../services/apiClient";
 import Router from "next/router";
 import { destroyCookie, parseCookies, setCookie } from "nookies";
 

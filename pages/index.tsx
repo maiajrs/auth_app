@@ -1,8 +1,10 @@
+import { GetServerSideProps } from "next";
+import { parseCookies } from "nookies";
 import React, { FormEvent } from "react";
 import signContext from "../context/AuthContext";
 import styles from "../styles/Home.module.css";
+import { withSSRGuest } from "../utils/withSSRGuest";
 export default function Home() {
-  console.log('oi do home')
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
@@ -11,11 +13,7 @@ export default function Home() {
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
 
-    const data = await signIn({ email, password });
-    if (isAuthenticated) {
-      
-      console.log("foi authenticado", data)
-    }
+    await signIn({ email, password });
   }
   return (
     <form onSubmit={handleSubmit} className={styles.container}>
@@ -26,3 +24,9 @@ export default function Home() {
     </form>
   );
 }
+
+export const getServerSideProps = withSSRGuest(async (ctx) => {
+  return {
+    props: {},
+  };
+});
