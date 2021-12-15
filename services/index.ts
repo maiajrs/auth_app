@@ -2,11 +2,14 @@ import axios, { AxiosError } from "axios";
 import { GetServerSidePropsContext } from "next";
 import { parseCookies, setCookie } from "nookies";
 import { signOut } from "../context/AuthContext";
+import { AuthTokenError } from "./erros/AuthTokenError";
 
 let isRefreshing = false;
 let failedRequestsQueue = [];
 
-export function setupAPIClient(ctx: GetServerSidePropsContext | undefined  = undefined) {
+export function setupAPIClient(
+  ctx: GetServerSidePropsContext | undefined = undefined
+) {
   let cookies = parseCookies(ctx);
 
   const api = axios.create({
@@ -21,7 +24,6 @@ export function setupAPIClient(ctx: GetServerSidePropsContext | undefined  = und
     (error: AxiosError) => {
       if (error.response?.status === 401) {
         if (error.response?.data.code === "token.expired") {
-
           cookies = parseCookies(ctx);
           const { "next-auth.refreshToken": refreshToken } = cookies;
           const originalConfig = error.config;
@@ -83,6 +85,8 @@ export function setupAPIClient(ctx: GetServerSidePropsContext | undefined  = und
         } else {
           if (process.browser) {
             signOut();
+          } else {
+            return Promise.reject(new AuthTokenError())
           }
         }
       }
