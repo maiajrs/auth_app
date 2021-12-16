@@ -87,5 +87,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
 }
 
 export default function signContext() {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   return useContext(AuthContext);
 }
