@@ -21,7 +21,8 @@ type SignInCredentials = {
 };
 
 type AuthContextData = {
-  signIn(creadentials: SignInCredentials): Promise<void>;
+  signIn: (creadentials: SignInCredentials) => Promise<void>;
+  signOut: () => void;
   user: User | undefined;
   isAuthenticated: boolean;
 };
@@ -31,10 +32,12 @@ type AuthProviderProps = {
 };
 
 const AuthContext = createContext({} as AuthContextData);
+let authChannel: BroadcastChannel;
 
 export function signOut() {
   destroyCookie(undefined, "next-auth.token");
   destroyCookie(undefined, "next-auth.refreshToken");
+  authChannel.postMessage('signOut')
   Router.push("/");
 }
 
@@ -43,14 +46,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const isAuthenticated = !!user;
 
   useEffect(() => {
+    authChannel = new BroadcastChannel('auth');
+
+    authChannel.onmessage = (message) => {
+      switch (message.data) {
+        case 'signOut': {
+          signOut();
+          authChannel.close();
+          break;
+        }
+        default: break;      }
+    }
+  }, [])
+
+  useEffect(() => {
     const { "next-auth.token": token } = parseCookies();
     if (token) {
-      api.get("/me").then((response) => {
-        const { permissions, roles, email } = response.data;
-        setUser({ email, permissions, roles });
-      }).catch(() => {
-        signOut()
-      })
+      api
+        .get("/me")
+        .then((response) => {
+          const { permissions, roles, email } = response.data;
+          setUser({ email, permissions, roles });
+        })
+        .catch(() => {
+          signOut();
+        });
     }
   }, []);
 
@@ -80,7 +100,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, signIn, user }}>
+    <AuthContext.Provider value={{ isAuthenticated, signOut, signIn, user }}>
       {children}
     </AuthContext.Provider>
   );
