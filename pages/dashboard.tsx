@@ -13,7 +13,7 @@ export default function Dashboad() {
   useEffect(() => {
     api
       .get("/me")
-      .then((response) => console.log(response))
+      .then((response) => console.log("dashboard"))
       .catch(() => {
         signOut();
       });
