@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import Can from "../components";
 import signContext, { signOut } from "../context/AuthContext";
 import { useCan } from "../hooks/userCan";
 import { setupAPIClient } from "../services";
@@ -8,7 +9,7 @@ import { withSSRAuth } from "../utils/withSSRAuth";
 export default function Dashboad() {
   const { user } = signContext();
 
-  const userCanSeeMetrics = useCan({ permissions: ["metrics.list"] });
+  
   useEffect(() => {
     api
       .get("/me")
@@ -21,7 +22,9 @@ export default function Dashboad() {
     <div>
       <h1>Dashboad: {user?.email}</h1>
 
-      {userCanSeeMetrics && <h1>Metrics</h1>}
+      <Can permissions={["metrics.list"]}>
+        <h1>Metrics</h1>
+      </Can>
     </div>
   );
 }
